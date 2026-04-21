@@ -507,12 +507,17 @@ try {
         </div>
         ${cat.images.length > 1 ? `<span class="absolute top-3 right-3 bg-black/60 text-white text-xs font-bold px-2 py-1 rounded-sm">${cat.images.length}</span>` : ''}
         ${cat.images.length > 1 ? `
-          <span class="absolute left-2 top-1/2 -translate-y-1/2 z-10 text-white cursor-pointer select-none opacity-0 group-hover:opacity-100 transition-opacity" data-card-arrow="prev" role="button" aria-label="Previous photo" tabindex="0" style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));">
+          <span class="hidden md:block absolute left-2 top-1/2 -translate-y-1/2 z-10 text-white cursor-pointer select-none opacity-0 group-hover:opacity-100 transition-opacity" data-card-arrow="prev" role="button" aria-label="Previous photo" tabindex="0" style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));">
             <span class="material-symbols-outlined" style="font-size:36px;font-variation-settings:'wght' 600;">chevron_left</span>
           </span>
-          <span class="absolute right-2 top-1/2 -translate-y-1/2 z-10 text-white cursor-pointer select-none opacity-0 group-hover:opacity-100 transition-opacity" data-card-arrow="next" role="button" aria-label="Next photo" tabindex="0" style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));">
+          <span class="hidden md:block absolute right-2 top-1/2 -translate-y-1/2 z-10 text-white cursor-pointer select-none opacity-0 group-hover:opacity-100 transition-opacity" data-card-arrow="next" role="button" aria-label="Next photo" tabindex="0" style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));">
             <span class="material-symbols-outlined" style="font-size:36px;font-variation-settings:'wght' 600;">chevron_right</span>
           </span>
+          <div class="md:hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 pointer-events-none" data-card-dots style="filter: drop-shadow(0 1px 3px rgba(0,0,0,0.6));">
+            <span class="w-1.5 h-1.5 rounded-full bg-white transition-colors" data-dot="0"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-white/40 transition-colors" data-dot="1"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-white/40 transition-colors" data-dot="2"></span>
+          </div>
         ` : ''}
       </div>
       <div class="flex justify-between items-start">
@@ -531,6 +536,21 @@ try {
     const scrollByPage = dir => scroller.scrollBy({ left: dir * scroller.clientWidth, behavior: 'smooth' });
     if (prev) prev.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); scrollByPage(-1); });
     if (next) next.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); scrollByPage(1); });
+
+    const dots = parent.querySelectorAll('[data-dot]');
+    if (dots.length) {
+      scroller.addEventListener('scroll', () => {
+        const total = scroller.scrollWidth - scroller.clientWidth;
+        const pct = total > 0 ? scroller.scrollLeft / total : 0;
+        let active = 1;
+        if (pct <= 0.01) active = 0;
+        else if (pct >= 0.99) active = 2;
+        dots.forEach((d, i) => {
+          d.classList.toggle('bg-white', i === active);
+          d.classList.toggle('bg-white/40', i !== active);
+        });
+      }, { passive: true });
+    }
   });
 
   applyRoute();
