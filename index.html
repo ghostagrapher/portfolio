@@ -99,6 +99,15 @@
       .no-scrollbar::-webkit-scrollbar {
         display: none;
       }
+      #reels-feed {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+      }
+      #reels-feed iframe {
+        touch-action: manipulation;
+        pointer-events: auto;
+        -webkit-tap-highlight-color: transparent;
+      }
     </style>
   </head>
   <body
@@ -363,27 +372,33 @@
         <div class="flex justify-center">
           <div class="relative">
             <div
-              class="no-scrollbar snap-y snap-mandatory overflow-y-scroll h-[min(85vh,896px)] w-full md:w-[504px] md:h-[896px] rounded-xl bg-black shadow-2xl"
+              class="no-scrollbar snap-y snap-mandatory overflow-y-scroll h-[min(85vh,896px)] w-full md:w-auto md:aspect-[9/16] md:h-[min(calc(100vh-12rem),896px)] rounded-xl bg-black shadow-2xl"
               id="reels-feed"
             ></div>
             <div
-              class="flex absolute right-3 md:right-auto md:-right-16 top-1/2 -translate-y-1/2 flex-col gap-3 z-20"
+              class="flex flex-row md:flex-col gap-4 md:gap-3 justify-center mt-5 md:mt-0 md:absolute md:-right-16 md:top-1/2 md:-translate-y-1/2 z-20"
             >
               <button
                 aria-label="Previous reel"
-                class="w-11 h-11 md:w-12 md:h-12 rounded-full bg-black/50 md:bg-surface-container-high backdrop-blur-md md:backdrop-blur-none text-white md:text-primary hover:bg-black/70 md:hover:bg-surface-container-highest shadow-md flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                class="w-11 h-11 md:w-12 md:h-12 rounded-full bg-surface-container-high text-primary hover:bg-surface-container-highest shadow-md flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 id="rv-prev"
               >
-                <span class="material-symbols-outlined" style="font-size: 26px"
+                <span class="material-symbols-outlined md:hidden" style="font-size: 26px"
+                  >keyboard_arrow_up</span
+                >
+                <span class="material-symbols-outlined hidden md:inline" style="font-size: 26px"
                   >keyboard_arrow_up</span
                 >
               </button>
               <button
                 aria-label="Next reel"
-                class="w-11 h-11 md:w-12 md:h-12 rounded-full bg-black/50 md:bg-surface-container-high backdrop-blur-md md:backdrop-blur-none text-white md:text-primary hover:bg-black/70 md:hover:bg-surface-container-highest shadow-md flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                class="w-11 h-11 md:w-12 md:h-12 rounded-full bg-surface-container-high text-primary hover:bg-surface-container-highest shadow-md flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 id="rv-next"
               >
-                <span class="material-symbols-outlined" style="font-size: 26px"
+                <span class="material-symbols-outlined md:hidden" style="font-size: 26px"
+                  >keyboard_arrow_down</span
+                >
+                <span class="material-symbols-outlined hidden md:inline" style="font-size: 26px"
                   >keyboard_arrow_down</span
                 >
               </button>
@@ -768,26 +783,30 @@
               (item, i) => `
     <div class="snap-start snap-always h-full w-full flex items-center justify-center bg-black relative" data-src="${item.src}">
       <iframe class="h-full w-full" src="about:blank" allow="autoplay; fullscreen" allowfullscreen frameborder="0"></iframe>
-      <div class="md:hidden absolute inset-0 z-10" aria-hidden="true" style="touch-action:pan-y"></div>
-      <div class="absolute top-3 right-3 text-white/70 text-xs font-medium bg-black/40 backdrop-blur-sm px-2 py-1 rounded-full z-20">${i + 1} / ${reels.length}</div>
+      <div class="absolute top-3 right-3 text-white/70 text-xs font-medium bg-black/40 backdrop-blur-sm px-2 py-1 rounded-full">${i + 1} / ${reels.length}</div>
     </div>
   `,
             )
             .join("");
           const slides = reelsFeed.querySelectorAll("[data-src]");
+          const firstSlide = slides[0];
+          if (firstSlide) {
+            const firstIframe = firstSlide.querySelector("iframe");
+            if (firstIframe) firstIframe.src = firstSlide.dataset.src;
+          }
           reelObserver = new IntersectionObserver(
             (entries) => {
               for (const entry of entries) {
                 const iframe = entry.target.querySelector("iframe");
                 const realSrc = entry.target.dataset.src;
-                if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+                if (entry.intersectionRatio > 0.4) {
                   if (iframe.src !== realSrc) iframe.src = realSrc;
-                } else if (iframe.src !== "about:blank") {
+                } else if (entry.intersectionRatio < 0.1 && iframe.src !== "about:blank") {
                   iframe.src = "about:blank";
                 }
               }
             },
-            { root: reelsFeed, threshold: [0, 0.6, 1] },
+            { root: reelsFeed, threshold: [0, 0.1, 0.4, 1] },
           );
           slides.forEach((s) => reelObserver.observe(s));
           requestAnimationFrame(updateReelNavButtons);
