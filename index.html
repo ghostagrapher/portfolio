@@ -500,8 +500,20 @@ try {
   grid.innerHTML = gridCats.map((cat, i) => `
     <a href="#/cat/${encodeURIComponent(cat.slug)}" class="group cursor-pointer block ${i % 2 === 1 ? 'md:mt-32' : ''}" data-slug="${cat.slug}">
       <div class="bg-surface-container-low rounded-xl overflow-hidden aspect-[4/3] mb-6 relative">
-        <img alt="${cat.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" src="${cat.images[0].thumb || cat.images[0].src}"/>
+        <div class="flex h-full w-full overflow-x-auto snap-x snap-mandatory no-scrollbar" data-card-scroller>
+          ${cat.images.map((img, idx) => `
+            <img alt="${cat.title} ${idx + 1}" class="h-full w-full flex-none object-cover snap-center transition-transform duration-700 group-hover:scale-105" loading="lazy" src="${img.thumb || img.src}"/>
+          `).join('')}
+        </div>
         ${cat.images.length > 1 ? `<span class="absolute top-3 right-3 bg-black/60 text-white text-xs font-bold px-2 py-1 rounded-sm">${cat.images.length}</span>` : ''}
+        ${cat.images.length > 1 ? `
+          <span class="absolute left-2 top-1/2 -translate-y-1/2 z-10 text-white cursor-pointer select-none opacity-0 group-hover:opacity-100 transition-opacity" data-card-arrow="prev" role="button" aria-label="Previous photo" tabindex="0" style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));">
+            <span class="material-symbols-outlined" style="font-size:36px;font-variation-settings:'wght' 600;">chevron_left</span>
+          </span>
+          <span class="absolute right-2 top-1/2 -translate-y-1/2 z-10 text-white cursor-pointer select-none opacity-0 group-hover:opacity-100 transition-opacity" data-card-arrow="next" role="button" aria-label="Next photo" tabindex="0" style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));">
+            <span class="material-symbols-outlined" style="font-size:36px;font-variation-settings:'wght' 600;">chevron_right</span>
+          </span>
+        ` : ''}
       </div>
       <div class="flex justify-between items-start">
         <div>
@@ -511,6 +523,15 @@ try {
       </div>
     </a>
   `).join('');
+
+  grid.querySelectorAll('[data-card-scroller]').forEach(scroller => {
+    const parent = scroller.parentElement;
+    const prev = parent.querySelector('[data-card-arrow="prev"]');
+    const next = parent.querySelector('[data-card-arrow="next"]');
+    const scrollByPage = dir => scroller.scrollBy({ left: dir * scroller.clientWidth, behavior: 'smooth' });
+    if (prev) prev.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); scrollByPage(-1); });
+    if (next) next.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); scrollByPage(1); });
+  });
 
   applyRoute();
 } catch (err) {
