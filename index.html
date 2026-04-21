@@ -91,19 +91,19 @@
 <div class="flex justify-between items-center w-full px-5 md:px-8 py-4 md:py-6 max-w-7xl mx-auto gap-4">
 <a class="text-base md:text-xl font-black tracking-tighter text-black dark:text-white hover:opacity-70 transition-opacity duration-300 whitespace-nowrap" href="#top">Madhurya Gop</a>
 <nav class="flex gap-4 md:gap-8 items-center text-sm md:text-base">
-<a class="hidden md:inline text-black dark:text-white border-b-2 border-black dark:border-white pb-1 font-bold font-['Manrope'] tracking-[-0.02em] hover:opacity-70 transition-opacity duration-300" href="#work">Work</a>
-<a class="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black text-white dark:bg-white dark:text-black font-bold text-xs tracking-wide hover:opacity-80 transition-opacity" href="#/reels">
-<span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1;">play_circle</span>
-Reels
+<a class="hidden md:inline font-['Manrope'] tracking-[-0.02em] duration-300" data-nav="work" href="#work">Work</a>
+<a class="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black text-white dark:bg-white dark:text-black font-bold text-xs tracking-wide hover:opacity-80 transition-opacity" id="nav-mobile" href="#/reels">
+<span class="material-symbols-outlined" id="nav-mobile-icon" style="font-size:16px;font-variation-settings:'FILL' 1;">play_circle</span>
+<span id="nav-mobile-label">Reels</span>
 </a>
-<a class="hidden md:inline text-neutral-500 dark:text-neutral-400 font-medium hover:text-black dark:hover:text-white transition-colors font-['Manrope'] tracking-[-0.02em] hover:opacity-70 duration-300" href="#/reels">Reels</a>
+<a class="hidden md:inline font-['Manrope'] tracking-[-0.02em] duration-300" data-nav="reels" href="#/reels">Reels</a>
 <a class="hidden md:inline text-neutral-500 dark:text-neutral-400 font-medium hover:text-black dark:hover:text-white transition-colors font-['Manrope'] tracking-[-0.02em] hover:opacity-70 duration-300" href="#about">About</a>
 <a class="hidden md:inline text-neutral-500 dark:text-neutral-400 font-medium hover:text-black dark:hover:text-white transition-colors font-['Manrope'] tracking-[-0.02em] hover:opacity-70 duration-300" href="#contact">Contact</a>
 </nav>
 </div>
 </header>
 <!-- BottomNavBar (Mobile) -->
-<nav class="md:hidden fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex gap-4 items-center bg-white/80 dark:bg-black/80 backdrop-blur-xl rounded-full px-6 py-3 w-max shadow-[0px_20px_40px_rgba(0,0,0,0.04)]">
+<nav aria-label="Mobile navigation" class="md:hidden fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex gap-4 items-center bg-white/80 dark:bg-black/80 backdrop-blur-xl rounded-full px-6 py-3 w-max shadow-[0px_20px_40px_rgba(0,0,0,0.04)]" id="bottom-nav">
 <a class="bg-black dark:bg-white text-white dark:text-black rounded-full p-3 scale-110 flex items-center justify-center transition-all" href="#work">
 <span class="material-symbols-outlined" data-icon="grid_view" style="font-variation-settings: 'FILL' 1;">grid_view</span>
 </a>
@@ -331,8 +331,43 @@ function parseRoute(hash) {
   return m ? { name: 'category', slug: decodeURIComponent(m[1]) } : { name: 'home' };
 }
 
+const navActiveClasses = ['text-black', 'dark:text-white', 'border-b-2', 'border-black', 'dark:border-white', 'pb-1', 'font-bold', 'hover:opacity-70', 'transition-opacity'];
+const navInactiveClasses = ['text-neutral-500', 'dark:text-neutral-400', 'font-medium', 'hover:text-black', 'dark:hover:text-white', 'transition-colors', 'hover:opacity-70'];
+
+function setNavActive(el, active) {
+  el.classList.remove(...navActiveClasses, ...navInactiveClasses);
+  el.classList.add(...(active ? navActiveClasses : navInactiveClasses));
+}
+
+function updateNav(routeName) {
+  const onReels = routeName === 'reels';
+  const work = document.querySelector('[data-nav="work"]');
+  const reels = document.querySelector('[data-nav="reels"]');
+  if (work) setNavActive(work, !onReels);
+  if (reels) setNavActive(reels, onReels);
+
+  const mobile = document.getElementById('nav-mobile');
+  const mobileIcon = document.getElementById('nav-mobile-icon');
+  const mobileLabel = document.getElementById('nav-mobile-label');
+  if (mobile && mobileIcon && mobileLabel) {
+    if (onReels) {
+      mobile.setAttribute('href', '#work');
+      mobileIcon.textContent = 'grid_view';
+      mobileLabel.textContent = 'Work';
+    } else {
+      mobile.setAttribute('href', '#/reels');
+      mobileIcon.textContent = 'play_circle';
+      mobileLabel.textContent = 'Reels';
+    }
+  }
+
+  const bottomNav = document.getElementById('bottom-nav');
+  if (bottomNav) bottomNav.classList.toggle('hidden', onReels);
+}
+
 function applyRoute() {
   const route = parseRoute(location.hash);
+  updateNav(route.name);
   if (route.name === 'category') {
     showCategory(route.slug);
     globalThis.scrollTo({ top: 0, behavior: 'instant' });
@@ -491,7 +526,7 @@ try {
                 © 2026 Madhurya Gop. All rights reserved.
             </div>
 <div class="flex gap-6 font-['Manrope'] text-sm tracking-wide">
-<a class="text-neutral-500 hover:text-black dark:hover:text-white hover:opacity-80 transition-all duration-300" href="#">LinkedIn</a>
+<a class="text-neutral-500 hover:text-black dark:hover:text-white hover:opacity-80 transition-all duration-300" href="https://aagrawal1022.github.io/portfolio/" rel="noopener" target="_blank">Designed &amp; Managed by Abhishek Agrawal</a>
 </div>
 </div>
 </footer>
