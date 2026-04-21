@@ -502,7 +502,7 @@ try {
       <div class="bg-surface-container-low rounded-xl overflow-hidden aspect-[4/3] mb-6 relative">
         <div class="flex h-full w-full overflow-x-auto snap-x snap-mandatory no-scrollbar" data-card-scroller>
           ${cat.images.map((img, idx) => `
-            <img alt="${cat.title} ${idx + 1}" class="h-full w-full flex-none object-cover snap-center transition-transform duration-700 group-hover:scale-105" loading="lazy" src="${img.thumb || img.src}"/>
+            <img alt="${cat.title} ${idx + 1}" class="h-full w-full flex-none object-cover snap-center transition-transform duration-500 ease-out group-hover:scale-105 group-active:scale-105" loading="lazy" src="${img.thumb || img.src}"/>
           `).join('')}
         </div>
         ${cat.images.length > 1 ? `<span class="absolute top-3 right-3 bg-black/60 text-white text-xs font-bold px-2 py-1 rounded-sm">${cat.images.length}</span>` : ''}
